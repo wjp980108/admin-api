@@ -1,0 +1,91 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # 代码检查 + 测试 + 构建产物
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: latest
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Generate Prisma Client
+        run: pnpm db:generate
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Run tests
+        run: pnpm test:run
+
+      - name: Build the project
+        run: pnpm build
+
+      # 打包部署所需的文件（与 README 部署说明保持一致）：
+      # dist / prisma / prisma.config.ts / package.json
+      - name: Prepare deployment artifact
+        run: |
+          mkdir -p deploy
+          cp -r dist deploy/
+          cp -r prisma deploy/
+          cp prisma.config.ts deploy/
+          cp package.json deploy/
+
+      - name: Upload deployment artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: deploy
+          path: ./deploy
+
+  # 部署到服务器：仅 rsync 同步文件
+  # 服务器上的依赖安装、数据库迁移、启动服务请按 README "部署说明" 手动执行
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download deployment artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: deploy
+          path: ./deploy
+
+      # 同步文件到服务器（保留服务器上的 .env、logs、node_modules）
+      - name: Deploy via rsync
+        uses: burnett01/rsync-deployments@v8
+        with:
+          switches: >-
+            -avz --delete
+            --exclude='.env'
+            --exclude='.user.ini'
+            --exclude='logs/'
+            --exclude='node_modules/'
+          path: ./deploy/
+          remote_path: ${{ secrets.SERVER_TARGET }}
+          remote_host: ${{ secrets.SERVER_HOST }}
+          remote_port: ${{ secrets.SERVER_PORT }}
+          remote_user: ${{ secrets.SERVER_USER }}
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
