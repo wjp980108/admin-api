@@ -33,6 +33,9 @@ jobs:
         run: pnpm install
 
       - name: Generate Prisma Client
+        # CI 环境无需真实数据库，给一个占位 URL 通过 prisma.config.ts 的 env 校验
+        env:
+          DATABASE_URL: mysql://ci:ci@localhost:3306/ci
         run: pnpm db:generate
 
       - name: Lint
