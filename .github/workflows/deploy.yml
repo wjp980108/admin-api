@@ -180,7 +180,7 @@ jobs:
               exit 1
             fi
 
-            pnpm install --prod --frozen-lockfile
+            pnpm install --frozen-lockfile
             pnpm db:prod
 
             # The PM2 process is created manually on the server for the

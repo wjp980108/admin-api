@@ -19,7 +19,7 @@
     "test:run": "vitest run",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepare": "husky || true",
+    "prepare": "husky",
     "commit": "czg"
   },
   "dependencies": {
@@ -61,6 +61,14 @@
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.5"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "bcrypt",
+      "prisma"
+    ]
   },
   "lint-staged": {
     "*.ts": [
