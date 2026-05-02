@@ -24,10 +24,22 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    # Expose the Node version to downstream jobs so the deploy job can
+    # build the correct path on the production server without shipping
+    # .nvmrc itself.
+    outputs:
+      node_version: ${{ steps.node_version.outputs.version }}
+
     steps:
       # Pull the source code at the commit that triggered the workflow.
       - name: Checkout code
         uses: actions/checkout@v6
+
+      # Read .nvmrc once and expose it as a job output. Trim whitespace
+      # so the downstream consumer gets a clean version string.
+      - name: Read Node version from .nvmrc
+        id: node_version
+        run: echo "version=$(tr -d '[:space:]' < .nvmrc)" >> "$GITHUB_OUTPUT"
 
       # Install pnpm before setup-node so the next step can enable its cache.
       - name: Install pnpm
@@ -81,6 +93,7 @@ jobs:
           cp -r prisma deploy/
           cp prisma.config.ts deploy/
           cp package.json deploy/
+          cp pnpm-lock.yaml deploy/
 
       # Upload the bundle so the deploy job (a separate runner) can fetch it.
       - name: Upload deployment artifact
@@ -137,3 +150,47 @@ jobs:
           remote_port: ${{ secrets.SERVER_PORT }}
           remote_user: ${{ secrets.SERVER_USER }}
           remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      # Post-deploy: install prod deps, run migrations, restart PM2.
+      # Runs over SSH on the production server itself.
+      - name: Post-deploy (install, migrate, restart)
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          port: ${{ secrets.SERVER_PORT }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # Pass the Node version from the build job into the remote shell
+          # via the action's `envs` allowlist (any variable referenced here
+          # must be exported in `script_stop_env` style on the runner first).
+          envs: NODE_VERSION
+          script: |
+            set -e
+            cd ${{ secrets.SERVER_TARGET }}
+
+            # NODE_VERSION is injected from the build job's output (read
+            # from .nvmrc on the runner). The .nvmrc file itself is not
+            # shipped to the server.
+            export PATH=/www/server/nodejs/v${NODE_VERSION}/bin:$PATH
+
+            # .env holds production secrets and must be created manually
+            # on the server before first deploy.
+            if [ ! -f .env ]; then
+              echo "❌ .env not found at $(pwd). Create it manually before first deploy."
+              exit 1
+            fi
+
+            pnpm install --prod --frozen-lockfile
+            pnpm db:prod
+
+            # The PM2 process is created manually on the server for the
+            # first deploy. Skip the restart gracefully if it doesn't exist
+            # yet so the workflow can still finish (rsync + install + migrate).
+            if pm2 describe server > /dev/null 2>&1; then
+              pm2 restart server
+              pm2 save
+            else
+              echo "⚠️  PM2 process 'server' not found. Start it manually on the server after this workflow finishes."
+            fi
+        env:
+          NODE_VERSION: ${{ needs.build.outputs.node_version }}
