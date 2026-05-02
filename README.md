@@ -118,31 +118,65 @@ Visit `http://localhost:3000`, if you see `{"message":"API is running 🚀"}` th
 
 ## Deployment
 
-**1. Upload the following files to the server**
+Production deployment is fully automated via GitHub Actions (`.github/workflows/deploy.yml`). Every push to `main` builds the project on a GitHub runner, rsyncs the artifact to the server, runs migrations, and restarts the PM2 process.
 
-```
-dist               # Compiled output
-prisma             # Schema and migration files
-prisma.config.ts   # Prisma CLI configuration
-package.json
-```
+The flow assumes a Linux server with Node.js (matching `.nvmrc`), pnpm, and PM2 already available.
 
-**2. Run on the server**
+### One-time server setup
+
+**1. Create the project directory and `.env`**
+
+The deploy workflow expects the directory and `.env` to already exist:
 
 ```bash
-# Install dependencies
-pnpm install
+mkdir -p /www/wwwroot/admin/api
+cd /www/wwwroot/admin/api
 
-# Create and configure environment variables (only needed once)
-cp .env.example .env
-# Edit .env with production settings, make sure NODE_ENV=production
+# Create .env with production secrets — never commit this file
+cat > .env <<'EOF'
+PORT=3000
+NODE_ENV=production
 
-# Run database migrations
-pnpm db:prod
+DATABASE_URL="mysql://root:password@localhost:3306/admin_api"
+DATABASE_USER="root"
+DATABASE_PASSWORD="password"
+DATABASE_NAME="admin_api"
+DATABASE_HOST="localhost"
+DATABASE_PORT=3306
 
-# Seed default admin account (only needed once)
-pnpm db:seed:prod
+JWT_SECRET="your_secret_key"
+JWT_EXPIRES_IN="7d"
+EOF
+chmod 600 .env
+```
 
-# Start the server
-pnpm start
-``````
+**2. Configure PM2 to start on boot**
+
+Without this step PM2 will not relaunch your processes after a server reboot.
+
+```bash
+# Register a systemd unit so PM2 starts at boot
+pm2 startup systemd -u root --hp /root
+# If pm2 prints a sudo command, copy & run it as instructed.
+```
+
+After the PM2 process is started (see below) and confirmed running, save it so PM2 can resurrect it on boot:
+
+```bash
+pm2 save
+```
+
+`pm2 save` writes the current process list to `/root/.pm2/dump.pm2`, which the systemd unit reads on boot. The deploy workflow re-runs `pm2 save` on every deploy to keep this file in sync.
+
+### First deploy
+
+1. Push to `main`. The workflow rsyncs files, installs dependencies, and runs migrations. The PM2 step prints a warning because no process exists yet — this is expected.
+2. Start the process on the server using your process manager (e.g. the 宝塔 PM2 panel) with **process name `server`** and **entry file `dist/server.js`**.
+3. (Optional) Seed the default admin account:
+   ```bash
+   pnpm db:seed:prod
+   ```
+
+### Subsequent deploys
+
+Just push to `main`. The workflow installs dependencies, runs migrations, and runs `pm2 restart server`. The process survives both deploys and server reboots.

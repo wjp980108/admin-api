@@ -118,31 +118,65 @@ pnpm dev
 
 ## 部署说明
 
-**1. 上传以下文件到服务器**
+生产环境部署通过 GitHub Actions 自动完成（`.github/workflows/deploy.yml`）。每次推送到 `main` 分支，CI 会在 GitHub runner 上构建项目，rsync 到服务器，执行数据库迁移并重启 PM2 进程。
 
-```
-dist               # 编译产物
-prisma             # schema 和迁移文件
-prisma.config.ts   # Prisma CLI 配置
-package.json
-```
+部署流程假定服务器（Linux）已经装好 Node.js（版本与 `.nvmrc` 一致）、pnpm 和 PM2。
 
-**2. 服务器上执行**
+### 服务器一次性配置
+
+**1. 创建项目目录与 `.env`**
+
+部署 workflow 要求目录和 `.env` 提前存在：
 
 ```bash
-# 安装依赖
-pnpm install
+mkdir -p /www/wwwroot/admin/api
+cd /www/wwwroot/admin/api
 
-# 创建并填写环境变量文件（只需执行一次）
-cp .env.example .env
-# 编辑 .env，填入生产环境配置，注意 NODE_ENV=production
+# 创建生产环境 .env（绝对不要提交到仓库）
+cat > .env <<'EOF'
+PORT=3000
+NODE_ENV=production
 
-# 执行数据库迁移
-pnpm db:prod
+DATABASE_URL="mysql://root:密码@localhost:3306/admin_api"
+DATABASE_USER="root"
+DATABASE_PASSWORD="密码"
+DATABASE_NAME="admin_api"
+DATABASE_HOST="localhost"
+DATABASE_PORT=3306
 
-# 初始化默认管理员账户（只需执行一次）
-pnpm db:seed:prod
-
-# 启动服务
-pnpm start
+JWT_SECRET="你的密钥"
+JWT_EXPIRES_IN="7d"
+EOF
+chmod 600 .env
 ```
+
+**2. 配置 PM2 开机自启**
+
+不做这一步，服务器重启后 PM2 不会自动拉起项目。
+
+```bash
+# 注册 systemd 服务，让 PM2 在开机时启动
+pm2 startup systemd -u root --hp /root
+# 如果命令提示你执行某行 sudo 命令，按提示复制执行即可
+```
+
+PM2 进程启动并确认运行后（见下文），保存进程列表，PM2 才能在重启时恢复：
+
+```bash
+pm2 save
+```
+
+`pm2 save` 会把当前进程列表写到 `/root/.pm2/dump.pm2`，systemd 在开机时会读取这个文件恢复进程。部署 workflow 每次都会重新执行 `pm2 save`，保证 dump 文件与最新状态一致。
+
+### 首次部署
+
+1. 推送到 `main` —— workflow 会 rsync 文件、安装依赖、执行迁移。PM2 步骤会因为进程不存在而打印警告（这是预期行为）。
+2. 通过你的进程管理工具启动项目（例如宝塔 PM2 管理器），**进程名设为 `server`**，**启动文件设为 `dist/server.js`**。
+3. （可选）初始化默认管理员账户：
+   ```bash
+   pnpm db:seed:prod
+   ```
+
+### 后续部署
+
+直接推送到 `main` 分支即可。workflow 会自动安装依赖、执行迁移并执行 `pm2 restart server`。进程在重新部署和服务器重启后都会保持运行。
