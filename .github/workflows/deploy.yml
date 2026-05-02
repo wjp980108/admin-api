@@ -10,7 +10,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # 代码检查 + 测试 + 构建产物
+  # 构建产物
+  # 注：lint 与 test 由本地 husky / 开发流程保证，CI 不再重复执行
   build:
     runs-on: ubuntu-latest
 
@@ -37,12 +38,6 @@ jobs:
         env:
           DATABASE_URL: mysql://ci:ci@localhost:3306/ci
         run: pnpm db:generate
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Run tests
-        run: pnpm test:run
 
       - name: Build the project
         run: pnpm build
