@@ -1,49 +1,79 @@
 name: Deploy
 
+# Trigger: every push to the main branch.
 on:
   push:
     branches:
       - main
 
+# Only one Deploy run per ref at a time.
+# If a new push comes in while a previous run is still going, cancel the old one
+# so we don't ship an outdated build over a newer one.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # 构建产物
-  # 注：lint 与 test 由本地 husky / 开发流程保证，CI 不再重复执行
+  # ---------------------------------------------------------------------------
+  # Build job
+  # Compile TypeScript, generate Prisma Client, then bundle the files needed
+  # for production into an artifact.
+  #
+  # suite is an integration suite that requires a real MySQL instance.
+  # ---------------------------------------------------------------------------
   build:
     runs-on: ubuntu-latest
 
     steps:
+      # Pull the source code at the commit that triggered the workflow.
       - name: Checkout code
         uses: actions/checkout@v6
 
+      # Install pnpm before setup-node so the next step can enable its cache.
       - name: Install pnpm
         uses: pnpm/action-setup@v5
         with:
           version: latest
 
+      # Read the Node version from .nvmrc to keep CI in sync with local dev.
+      # `cache: pnpm` reuses the pnpm store across runs to speed up installs.
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
           cache: pnpm
 
+      # Install all dependencies (including devDependencies — needed to build).
       - name: Install dependencies
         run: pnpm install
 
+      # Generate the Prisma Client into src/generated/prisma so that `tsc`
+      # can resolve `@/generated/prisma/client` during the build step.
+      #
+      # prisma.config.ts requires DATABASE_URL via `env('DATABASE_URL')`.
+      # `prisma generate` itself does not connect to the database, but the
+      # config loader still validates the variable exists, so we inject a
+      # placeholder URL here. It is never used to talk to a real database.
       - name: Generate Prisma Client
-        # CI 环境无需真实数据库，给一个占位 URL 通过 prisma.config.ts 的 env 校验
         env:
           DATABASE_URL: mysql://ci:ci@localhost:3306/ci
         run: pnpm db:generate
 
+      # Compile TypeScript to JavaScript under ./dist.
+      # Runs `tsc && tsc-alias` (tsc-alias rewrites `@/*` path aliases to
+      # relative paths so the compiled output works at runtime).
       - name: Build the project
         run: pnpm build
 
-      # 打包部署所需的文件（与 README 部署说明保持一致）：
-      # dist / prisma / prisma.config.ts / package.json
+      # Stage only the files the production server needs.
+      # Mirrors the "Deployment" section in README.md:
+      #   - dist              compiled JS output
+      #   - prisma            schema + migrations (used by `migrate deploy`)
+      #   - prisma.config.ts  Prisma CLI configuration
+      #   - package.json      manifest used by `pnpm install` on the server
+      #
+      # node_modules / .env / lockfile are intentionally excluded — those are
+      # produced or owned on the server side.
       - name: Prepare deployment artifact
         run: |
           mkdir -p deploy
@@ -52,33 +82,53 @@ jobs:
           cp prisma.config.ts deploy/
           cp package.json deploy/
 
+      # Upload the bundle so the deploy job (a separate runner) can fetch it.
       - name: Upload deployment artifact
         uses: actions/upload-artifact@v6
         with:
           name: deploy
           path: ./deploy
 
-  # 部署到服务器：仅 rsync 同步文件
-  # 服务器上的依赖安装、数据库迁移、启动服务请按 README "部署说明" 手动执行
+  # ---------------------------------------------------------------------------
+  # Deploy job
+  # Pull the artifact built above and rsync it to the production server.
+  #
+  # Post-deploy steps (install prod deps, run `prisma migrate deploy`, restart
+  # the Node process) are performed manually on the server — see the
+  # "Deployment" section of README.md.
+  # ---------------------------------------------------------------------------
   deploy:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
+      # Fetch the artifact uploaded by the build job into ./deploy.
       - name: Download deployment artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: deploy
           path: ./deploy
 
-      # 同步文件到服务器（保留服务器上的 .env、logs、node_modules）
+      # Sync the artifact to the server over SSH.
+      #   -a  archive mode (preserve perms, timestamps, symlinks, etc.)
+      #   -v  verbose
+      #   -z  compress during transfer
+      #   --delete  remove files on the remote that no longer exist locally,
+      #             so the deploy directory mirrors the artifact exactly.
+      #
+      # Excludes protect server-owned state from being wiped by --delete:
+      #   .env           production secrets, never checked into git
+      #   logs/          runtime logs written by the app
+      #   node_modules/  installed on the server with `pnpm install --prod`
+      #
+      # All connection details are stored as repository secrets:
+      #   SERVER_HOST / SERVER_PORT / SERVER_USER / SERVER_TARGET / SSH_PRIVATE_KEY
       - name: Deploy via rsync
         uses: burnett01/rsync-deployments@v8
         with:
           switches: >-
             -avz --delete
             --exclude='.env'
-            --exclude='.user.ini'
             --exclude='logs/'
             --exclude='node_modules/'
           path: ./deploy/
