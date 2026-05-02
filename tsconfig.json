@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2020", // 编译成 ES2020 版本的 JS
+    "rootDir": "./src", // TS 源码放在 src 目录
+    "module": "commonjs", // 使用 CommonJS 模块规范（Node.js 默认）
+    "types": ["node"],
+    "strict": true, // 开启严格模式，类型检查更严格
+    "outDir": "dist", // 编译后的 JS 输出到 dist 目录
+    "esModuleInterop": true, // 允许 import 导入 CommonJS 模块
+    "skipLibCheck": true, // 跳过第三方库的类型检查，加快编译速度
+    "paths": {
+      "@/*": ["./src/*"],
+    }
+  },
+  "include": ["src/**/*"]
+}

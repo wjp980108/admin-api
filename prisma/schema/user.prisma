@@ -1,0 +1,13 @@
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String   @unique
+  avatar    String   @default("")
+  email     String   @default("")
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}

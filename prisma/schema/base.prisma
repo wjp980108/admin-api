@@ -1,0 +1,20 @@
+// ===========================
+// Prisma 配置文件 (base.prisma)
+// ===========================
+
+// generator 块：定义 Prisma Client 的生成方式
+// 每次运行 `prisma generate` 时会根据此配置生成客户端代码
+generator client {
+  // 使用官方的 prisma-client 生成器
+  provider = "prisma-client"
+
+  // 生成的客户端代码输出路径
+  output   = "../../src/generated/prisma"
+}
+
+// datasource 块：定义数据库连接信息
+// Prisma 通过此配置连接并操作数据库
+datasource db {
+  // 数据库类型
+  provider = "mysql"
+}
