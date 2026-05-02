@@ -19,7 +19,7 @@
     "test:run": "vitest run",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepare": "husky",
+    "prepare": "husky || true",
     "commit": "czg"
   },
   "dependencies": {
