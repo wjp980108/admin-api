@@ -1,18 +1,10 @@
-# 环境变量
+.idea
+.vscode
+.claude
+dist
+logs
+node_modules
+
+src/generated
+
 .env
-
-# 日志
-logs/
-
-# 依赖
-node_modules/
-
-# 编译输出
-dist/
-
-# Prisma 生成文件
-src/generated/
-
-# 编辑器
-.idea/
-.vscode/
