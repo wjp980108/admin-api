@@ -94,6 +94,7 @@ jobs:
           cp prisma.config.ts deploy/
           cp package.json deploy/
           cp pnpm-lock.yaml deploy/
+          cp pnpm-workspace.yaml deploy/
 
       # Upload the bundle so the deploy job (a separate runner) can fetch it.
       - name: Upload deployment artifact
