@@ -3,6 +3,7 @@ import * as authService from '@/services/authService';
 import { loginSchema } from '@/types/schemas';
 import { fail, success } from '@/utils/response';
 
+// 用户登录
 export async function login(req: Request, res: Response) {
   try {
     // 校验请求参数

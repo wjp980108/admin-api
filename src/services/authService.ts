@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import prisma from '@/config/database';
 
+// 用户登录
 export async function login(username: string, password: string) {
   // 根据用户名查找用户
   const user = await prisma.user.findUnique({
@@ -18,7 +19,7 @@ export async function login(username: string, password: string) {
 
   // 生成 token
   const token = jwt.sign(
-    { userId: user.id, phone: user.phone, username: user.username },
+    { userId: user.id },
     process.env.JWT_SECRET!,
     { expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as jwt.SignOptions['expiresIn'] },
   );

@@ -5,8 +5,6 @@ import { fail } from '@/utils/response';
 // 扩展 Request 类型，加上 userId 字段
 export interface AuthRequest extends Request {
   userId?: number;
-  phone?: string;
-  username?: string;
 }
 
 /**
@@ -25,8 +23,6 @@ export function authenticate(req: AuthRequest, res: Response, next: NextFunction
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as jwt.JwtPayload;
 
     req.userId = decoded.userId;
-    req.phone = decoded.phone;
-    req.username = decoded.username;
     next();
   }
   catch {
