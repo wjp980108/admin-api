@@ -28,9 +28,15 @@ app.use(cors());
 // 解析请求体中的 JSON 数据
 app.use(express.json());
 
-// 注册路由
+/* 注册路由 --- start */
+
+// 鉴权路由
 app.use('/api/auth', authRoutes);
-app.use('/api/user', userRoutes);
+
+// 用户路由
+app.use('/api/users', userRoutes);
+
+/* 注册路由 --- end */
 
 // 捕获所有异常
 app.use(errorHandler);

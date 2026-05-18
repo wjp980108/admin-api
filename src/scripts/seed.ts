@@ -10,7 +10,7 @@ async function initAccount() {
     where: { username: 'admin' },
     update: {},
     create: {
-      name: '超级管理员',
+      nickname: '超级管理员',
       phone: '18530802747',
       username: 'admin',
       password: hashedPassword,

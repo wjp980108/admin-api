@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { getUsrInfo } from '@/controllers/userController';
+import { getUserInfo } from '@/controllers/userController';
 import { authenticate } from '@/middlewares/authMiddleware';
 
 const router = Router();
 
 // 获取当前用户信息
-router.get('/info', authenticate, getUsrInfo);
+router.get('/info', authenticate, getUserInfo);
 
 export default router;
