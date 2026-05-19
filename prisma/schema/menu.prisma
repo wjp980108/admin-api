@@ -1,0 +1,23 @@
+model Menu {
+  id            Int      @id @default(autoincrement())
+  parentId      Int      @default(0)
+  name          String
+  path          String
+  routeName     String
+  componentPath String?
+  icon          String?
+  sort          Int      @default(0)
+  type          Int
+  perm          String?
+  keepAlive     Boolean  @default(false)
+  activeMenu    Boolean  @default(false)
+  hideInMenu    Boolean  @default(false)
+  hideInTag     Boolean  @default(false)
+  hideParent    Boolean  @default(false)
+  status        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([parentId, name])
+  @@map("meuns")
+}

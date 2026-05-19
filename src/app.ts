@@ -5,6 +5,7 @@ import { errorHandler } from '@/middlewares/errorMiddlewar';
 import { httpLogger } from '@/middlewares/loggerMiddlewares';
 import { globalLimiter } from '@/middlewares/rateLimitMiddlewares';
 import authRoutes from '@/routes/authRoutes';
+import menuRoutes from '@/routes/menuRoutes';
 import userRoutes from '@/routes/userRoutes';
 
 // 创建 Express 应用实例
@@ -35,6 +36,9 @@ app.use('/api/auth', authRoutes);
 
 // 用户路由
 app.use('/api/users', userRoutes);
+
+// 菜单路由
+app.use('/api', menuRoutes);
 
 /* 注册路由 --- end */
 
