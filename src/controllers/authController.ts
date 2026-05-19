@@ -1,24 +1,12 @@
-import type { Request, Response } from 'express';
 import * as authService from '@/services/authService';
-import { loginSchema } from '@/types/schemas';
-import { fail, success } from '@/utils/response';
+import { asyncHandler } from '@/utils/handler';
+import { success } from '@/utils/response';
+import { validate } from '@/utils/validate';
+import { loginSchema } from '@/validators/loginValidators';
 
 // 用户登录
-export async function login(req: Request, res: Response) {
-  try {
-    // 校验请求参数
-    const result = loginSchema.safeParse(req.body);
-
-    // 参数校验失败
-    if (!result.success)
-      return fail(res, result.error.issues[0].message);
-
-    const { username, password } = result.data;
-
-    const token = await authService.login(username, password);
-    success(res, token, '登录成功');
-  }
-  catch (error: any) {
-    fail(res, error.message, 401);
-  }
-}
+export const login = asyncHandler(async (req, res) => {
+  const { username, password } = validate(loginSchema, req.body);
+  const token = await authService.login(username, password);
+  success(res, token, '登录成功');
+});
