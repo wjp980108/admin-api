@@ -6,6 +6,7 @@ model Role {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  users UserRole[]
   menus RoleMenu[]
 
   @@unique([name])

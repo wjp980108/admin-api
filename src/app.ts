@@ -36,7 +36,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 
 // 用户路由
-app.use('/api/users', userRoutes);
+app.use('/api', userRoutes);
 
 // 菜单路由
 app.use('/api', menuRoutes);

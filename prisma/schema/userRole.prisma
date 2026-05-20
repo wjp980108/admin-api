@@ -1,0 +1,13 @@
+model UserRole {
+  userId Int
+  roleId Int
+
+  // userId 是外键，关联 User 表的 id；用户删除时，自动删除该条关联记录
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // roleId 是外键，关联 Role 表的 id；角色删除时，自动删除该条关联记录
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  // 联合主键，同一用户和角色只能关联一次
+  @@id([userId, roleId])
+  @@map("user_role")
+}
