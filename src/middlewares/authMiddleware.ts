@@ -2,16 +2,11 @@ import type { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { fail } from '@/utils/response';
 
-// 扩展 Request 类型，加上 userId 字段
-export interface AuthRequest extends Request {
-  userId?: number;
-}
-
 /**
  * JWT 身份认证中间件
  * 从请求头中提取并校验 token，将用户信息挂载到 req 上后交给下一个中间件
  */
-export function authenticate(req: AuthRequest, res: Response, next: NextFunction) {
+export function authenticate(req: Request, res: Response, next: NextFunction) {
   const token = req.headers.authorization?.split(' ')[1];
 
   // token 不存在
