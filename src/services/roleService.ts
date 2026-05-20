@@ -24,6 +24,7 @@ export async function getRoleList(query: RoleQuery) {
       where,
       skip: (page - 1) * pageSize, // 当前页的前面有几页 * 每页几条
       take: pageSize,
+      orderBy: { createdAt: 'desc' },
     }),
     // 查询总条数
     prisma.role.count({ where }),
