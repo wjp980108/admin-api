@@ -1,8 +1,6 @@
-import type { Response } from 'express';
-import type { AuthRequest } from '@/middlewares/authMiddleware';
 import * as userService from '@/services/userService';
 import { asyncHandler } from '@/utils/handler';
-import { fail, success } from '@/utils/response';
+import { success } from '@/utils/response';
 import { validate } from '@/utils/validate';
 import { idSchema } from '@/validators/commonValidators';
 import { userSchema } from '@/validators/userValidators';
@@ -34,14 +32,3 @@ export const deleteUser = asyncHandler(async (req, res) => {
   await userService.deleteUser(id);
   success(res);
 });
-
-// 获取用户信息
-export async function getUserInfo(req: AuthRequest, res: Response) {
-  try {
-    const userInfo = await userService.getUserInfo(req.userId!);
-    success(res, userInfo, '获取成功');
-  }
-  catch (error: any) {
-    fail(res, error.message, 401);
-  }
-}
