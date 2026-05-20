@@ -18,6 +18,8 @@ model Menu {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  roles RoleMenu[]
+
   @@unique([parentId, name])
   @@map("meuns")
 }

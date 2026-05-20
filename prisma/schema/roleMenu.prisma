@@ -1,0 +1,13 @@
+model RoleMenu {
+  roleId Int
+  menuId Int
+
+  // roleId 是外键，关联 Role 表的 id；角色删除时，自动删除该条关联记录
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  // menuId 是外键，关联 Menu 表的 id；菜单删除时，自动删除该条关联记录
+  menu Menu @relation(fields: [menuId], references: [id], onDelete: Cascade)
+
+  // 联合主键，同一角色和菜单只能关联一次
+  @@id([roleId, menuId])
+  @@map("role_menu")
+}

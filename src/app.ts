@@ -6,6 +6,7 @@ import { httpLogger } from '@/middlewares/loggerMiddlewares';
 import { globalLimiter } from '@/middlewares/rateLimitMiddlewares';
 import authRoutes from '@/routes/authRoutes';
 import menuRoutes from '@/routes/menuRoutes';
+import roleRoutes from '@/routes/roleRoutes';
 import userRoutes from '@/routes/userRoutes';
 
 // 创建 Express 应用实例
@@ -39,6 +40,9 @@ app.use('/api/users', userRoutes);
 
 // 菜单路由
 app.use('/api', menuRoutes);
+
+// 角色路由
+app.use('/api', roleRoutes);
 
 /* 注册路由 --- end */
 
