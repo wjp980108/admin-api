@@ -3,7 +3,7 @@ import { asyncHandler } from '@/utils/handler';
 import { success } from '@/utils/response';
 import { validate } from '@/utils/validate';
 import { idSchema } from '@/validators/commonValidators';
-import { roleSchema } from '@/validators/roleValidators';
+import { roleQuerySchema, roleSchema } from '@/validators/roleValidators';
 
 // 获取全量角色列表
 export const getRoleAll = asyncHandler(async (req, res) => {
@@ -13,7 +13,8 @@ export const getRoleAll = asyncHandler(async (req, res) => {
 
 // 获取带分页的角色列表
 export const getRoleList = asyncHandler(async (req, res) => {
-  const role = await roleService.getRoleList(req.query);
+  const query = validate(roleQuerySchema, req.query);
+  const role = await roleService.getRoleList(query);
   success(res, role);
 });
 

@@ -9,3 +9,12 @@ export const idSchema = z.object({
 export const statusSchema = z.object({
   status: z.boolean(),
 });
+
+// 分页参数校验（query string 自动 coerce）
+export const paginationSchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(1),
+  pageSize: z.coerce.number().int().positive().optional().default(10),
+});
+
+// query string 布尔值转换：仅接受 "true" / "false"，z.coerce.boolean() 不适用于 query（Boolean("false") === true）
+export const queryBoolean = z.enum(['true', 'false']).transform(v => v === 'true');

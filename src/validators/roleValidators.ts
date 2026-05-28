@@ -1,4 +1,11 @@
 import { z } from 'zod';
+import { paginationSchema, queryBoolean } from '@/validators/commonValidators';
+
+// 角色查询参数校验
+export const roleQuerySchema = paginationSchema.extend({
+  name: z.string().optional(),
+  status: queryBoolean.optional(),
+});
 
 // 角色校验
 export const roleSchema = z.object({
