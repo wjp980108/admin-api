@@ -12,7 +12,7 @@ export const menuSchema = z.object({
   type: z.union([z.literal(0), z.literal(1), z.literal(2)], { error: 'type 只能为 0（目录）、1（菜单）、2（按钮）' }),
   perm: z.string().optional(),
   keepAlive: z.boolean().optional(),
-  activeMenu: z.boolean().optional(),
+  activeMenu: z.string().optional(),
   hideInMenu: z.boolean().optional(),
   hideInTag: z.boolean().optional(),
   hideParent: z.boolean().optional(),

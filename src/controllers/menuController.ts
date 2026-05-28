@@ -2,7 +2,7 @@ import * as menuService from '@/services/menuService';
 import { asyncHandler } from '@/utils/handler';
 import { success } from '@/utils/response';
 import { validate } from '@/utils/validate';
-import { idSchema } from '@/validators/commonValidators';
+import { idSchema, statusSchema } from '@/validators/commonValidators';
 import { menuSchema } from '@/validators/menuValidators';
 
 // 获取菜单列表
@@ -30,5 +30,13 @@ export const updateMenu = asyncHandler(async (req, res) => {
 export const deleteMenu = asyncHandler(async (req, res) => {
   const { id } = validate(idSchema, req.params);
   await menuService.deleteMenu(id);
+  success(res);
+});
+
+// 更新菜单状态
+export const updateMenuStatus = asyncHandler(async (req, res) => {
+  const { id } = validate(idSchema, req.params);
+  const { status } = validate(statusSchema, req.body);
+  await menuService.updateMenuStatus(id, status);
   success(res);
 });

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { addMenu, deleteMenu, getMenuList, updateMenu } from '@/controllers/menuController';
+import { addMenu, deleteMenu, getMenuList, updateMenu, updateMenuStatus } from '@/controllers/menuController';
 import { authenticate } from '@/middlewares/authMiddleware';
 
 const router = Router();
@@ -15,5 +15,8 @@ router.put('/menus/:id', authenticate, updateMenu);
 
 // 删除菜单
 router.delete('/menus/:id', authenticate, deleteMenu);
+
+// 删除菜单
+router.patch('/menus/:id/status', authenticate, updateMenuStatus);
 
 export default router;

@@ -10,7 +10,7 @@ model Menu {
   type          Int
   perm          String?
   keepAlive     Boolean  @default(false)
-  activeMenu    Boolean  @default(false)
+  activeMenu    String?
   hideInMenu    Boolean  @default(false)
   hideInTag     Boolean  @default(false)
   hideParent    Boolean  @default(false)

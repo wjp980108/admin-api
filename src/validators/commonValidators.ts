@@ -4,3 +4,8 @@ import { z } from 'zod';
 export const idSchema = z.object({
   id: z.coerce.number().int('id 必须为整数').positive('id 必须为正整数'),
 });
+
+// 状态校验
+export const statusSchema = z.object({
+  status: z.boolean(),
+});
