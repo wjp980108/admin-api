@@ -111,3 +111,25 @@ export async function deleteRole(id: number) {
     throw error;
   }
 }
+
+// 更新菜单状态
+export async function updateRoleStatus(id: number, status: boolean) {
+  if (!status) {
+    const userCount = await prisma.userRole.count({ where: { roleId: id } });
+    if (userCount > 0)
+      throw new Error(`该角色已被 ${userCount} 个用户使用，请先解除关联后再禁用`);
+  }
+
+  try {
+    return await prisma.role.update({
+      where: { id },
+      data: { status },
+    });
+  }
+  catch (error: any) {
+    if (error.code === 'P2025')
+      throw new Error('角色不存在');
+
+    throw error;
+  }
+}

@@ -2,7 +2,7 @@ import * as roleService from '@/services/roleService';
 import { asyncHandler } from '@/utils/handler';
 import { success } from '@/utils/response';
 import { validate } from '@/utils/validate';
-import { idSchema } from '@/validators/commonValidators';
+import { idSchema, statusSchema } from '@/validators/commonValidators';
 import { roleQuerySchema, roleSchema } from '@/validators/roleValidators';
 
 // 获取全量角色列表
@@ -37,5 +37,13 @@ export const updateRole = asyncHandler(async (req, res) => {
 export const deleteRole = asyncHandler(async (req, res) => {
   const { id } = validate(idSchema, req.params);
   await roleService.deleteRole(id);
+  success(res);
+});
+
+// 更新角色状态
+export const updateRoleStatus = asyncHandler(async (req, res) => {
+  const { id } = validate(idSchema, req.params);
+  const { status } = validate(statusSchema, req.body);
+  await roleService.updateRoleStatus(id, status);
   success(res);
 });

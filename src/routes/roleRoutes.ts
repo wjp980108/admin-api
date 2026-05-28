@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { addRole, deleteRole, getRoleAll, getRoleList, updateRole } from '@/controllers/roleController';
+import { addRole, deleteRole, getRoleAll, getRoleList, updateRole, updateRoleStatus } from '@/controllers/roleController';
 import { authenticate } from '@/middlewares/authMiddleware';
 
 const router = Router();
@@ -18,5 +18,8 @@ router.put('/roles/:id', authenticate, updateRole);
 
 // 删除角色
 router.delete('/roles/:id', authenticate, deleteRole);
+
+// 更新角色状态
+router.patch('/roles/:id/status', authenticate, updateRoleStatus);
 
 export default router;
