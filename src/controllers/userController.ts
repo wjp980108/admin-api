@@ -3,11 +3,24 @@ import { asyncHandler } from '@/utils/handler';
 import { success } from '@/utils/response';
 import { validate } from '@/utils/validate';
 import { idSchema } from '@/validators/commonValidators';
-import { userSchema } from '@/validators/userValidators';
+import { userQuerySchema, userSchema } from '@/validators/userValidators';
+
+// 获取当前登录用户的信息
+export const getUser = asyncHandler(async (req, res) => {
+  const user = await userService.getUser(req.userId!);
+  success(res, user);
+});
+
+// 获取当前登录用户的菜单
+export const getMenus = asyncHandler(async (req, res) => {
+  const data = await userService.getUserMenus(req.userId!);
+  success(res, data);
+});
 
 // 获取用户列表
 export const getUserList = asyncHandler(async (req, res) => {
-  const role = await userService.getUserList(req.query);
+  const query = validate(userQuerySchema, req.query);
+  const role = await userService.getUserList(query);
   success(res, role);
 });
 

@@ -1,8 +1,14 @@
 import { Router } from 'express';
-import { addUser, deleteUser, getUserList, updateUser } from '@/controllers/userController';
+import { addUser, deleteUser, getMenus, getUser, getUserList, updateUser } from '@/controllers/userController';
 import { authenticate } from '@/middlewares/authMiddleware';
 
 const router = Router();
+
+// 获取当前登录用户的信息
+router.get('/user', authenticate, getUser);
+
+// 获取当前登录用户的菜单
+router.get('/user/menus', authenticate, getMenus);
 
 // 获取用户列表
 router.get('/users', authenticate, getUserList);

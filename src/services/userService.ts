@@ -1,6 +1,68 @@
 import type { UserCreateData, UserQuery, UserUpdateData } from '@/types/user';
 import prisma from '@/config/database';
 import { hashPassword } from '@/utils/password';
+import { buildTree } from '@/utils/tree';
+
+// 获取当前登录用户的信息
+export async function getUser(userId: number) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      nickname: true,
+      phone: true,
+      email: true,
+      avatar: true,
+    },
+  });
+
+  if (!user)
+    throw new Error('用户不存在');
+
+  return {
+    userId,
+    nickname: user.nickname,
+    phone: user.phone,
+    email: user.email,
+    avatar: user.avatar,
+  };
+}
+
+// 获取当前登录用户的菜单
+export async function getUserMenus(userId: number) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user)
+    throw new Error('用户不存在');
+
+  let menus;
+  if (user.isSystem) {
+    // 如果是管理员直接获取所有菜单
+    menus = await prisma.menu.findMany({
+      orderBy: { sort: 'asc' },
+    });
+  }
+  else {
+    // 获取用户对应角色的菜单
+    menus = await prisma.menu.findMany({
+      where: {
+        status: true,
+        roles: {
+          some: {
+            role: {
+              users: {
+                some: {
+                  userId,
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { sort: 'asc' },
+    });
+  }
+
+  return buildTree(menus);
+}
 
 // 获取用户列表
 export async function getUserList(query: UserQuery) {
