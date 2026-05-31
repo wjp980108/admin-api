@@ -37,6 +37,9 @@ export async function getUserMenus(userId: number) {
   if (user.isSystem) {
     // 如果是管理员直接获取所有菜单
     menus = await prisma.menu.findMany({
+      where: {
+        type: { not: 2 },
+      },
       orderBy: { sort: 'asc' },
     });
   }
