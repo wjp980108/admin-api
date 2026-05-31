@@ -5,11 +5,12 @@ import { buildTree } from '@/utils/tree';
 
 // 获取菜单列表
 export async function getMenuList(query: MenuQuery) {
-  const { name } = query;
+  const { name, status } = query;
 
   const menus = await prisma.menu.findMany({
     where: {
       ...(name && { name: { contains: name } }),
+      ...(status !== undefined && { status }),
     },
     orderBy: { sort: 'asc' },
   });

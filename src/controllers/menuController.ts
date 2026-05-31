@@ -3,11 +3,12 @@ import { asyncHandler } from '@/utils/handler';
 import { success } from '@/utils/response';
 import { validate } from '@/utils/validate';
 import { idSchema, statusSchema } from '@/validators/commonValidators';
-import { menuSchema } from '@/validators/menuValidators';
+import { menuQuerySchema, menuSchema } from '@/validators/menuValidators';
 
 // 获取菜单列表
 export const getMenuList = asyncHandler(async (req, res) => {
-  const menu = await menuService.getMenuList(req.query);
+  const query = validate(menuQuerySchema, req.query);
+  const menu = await menuService.getMenuList(query);
   success(res, menu);
 });
 

@@ -1,4 +1,11 @@
 import { z } from 'zod';
+import { queryBoolean } from '@/validators/commonValidators';
+
+// 菜单查询参数校验
+export const menuQuerySchema = z.object({
+  name: z.string().optional(),
+  status: queryBoolean.optional(),
+});
 
 // 菜单校验
 export const menuSchema = z.object({
