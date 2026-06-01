@@ -1,10 +1,10 @@
 model Role {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String?
-  status      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  name      String
+  remark    String?
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   users UserRole[]
   menus RoleMenu[]

@@ -1,3 +1,4 @@
+import type { Prisma } from '@/generated/prisma/client';
 import type { RoleCreateData, RoleQuery, RoleUpdateData } from '@/types/role';
 import prisma from '@/config/database';
 
@@ -12,23 +13,29 @@ export async function getRoleAll() {
 export async function getRoleList(query: RoleQuery) {
   const { name, status, page = 1, pageSize = 10 } = query;
 
-  const where = {
+  const where: Prisma.RoleWhereInput = {
     ...(name && { name: { contains: name } }),
     ...(status !== undefined && { status }),
   };
 
   // 开启事务，同时执行多个互不依赖的查询
-  const [list, total] = await prisma.$transaction([
+  const [roles, total] = await prisma.$transaction([
     // 查询当前页数据
     prisma.role.findMany({
       where,
       skip: (page - 1) * pageSize, // 当前页的前面有几页 * 每页几条
       take: pageSize,
       orderBy: { createdAt: 'desc' },
+      include: { menus: { select: { menuId: true } } },
     }),
     // 查询总条数
     prisma.role.count({ where }),
   ]);
+
+  const list = roles.map(({ menus, ...role }) => ({
+    ...role,
+    menuIds: menus.map(m => m.menuId),
+  }));
 
   return { list, total };
 }
