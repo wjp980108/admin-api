@@ -14,6 +14,7 @@ A REST API for backend management system built with Express + TypeScript + Prism
 - **Logging**: Morgan + Winston
 - **Rate Limiting**: express-rate-limit
 - **Security**: Helmet
+- **File Upload**: Multer + Qiniu
 - **Testing**: Vitest + Supertest
 - **Package Manager**: pnpm
 
@@ -31,6 +32,7 @@ admin-api
 │   ├── config             # Configuration files (database connection, etc.)
 │   ├── controllers        # Controllers: parse requests, call services, return responses
 │   ├── generated          # Prisma auto-generated client (not committed to Git)
+│   ├── infrastructure     # Third-party service integrations
 │   ├── middlewares        # Middlewares: auth, rate limiting, error handling, etc.
 │   ├── routes             # Route definitions
 │   ├── scripts            # Scripts (data initialization, task scripts, etc.)
@@ -93,6 +95,12 @@ DATABASE_PORT=3306
 
 JWT_SECRET="your_secret_key"
 JWT_EXPIRES_IN="7d"
+
+QINIU_ACCESS_KEY="your_access_key"
+QINIU_SECRET_KEY="your_secret_key"
+QINIU_BUCKET="your_bucket_name"
+QINIU_DOMAIN="https://cdn.example.com"
+QINIU_ZONE=z0
 ```
 
 ### 4. Initialize the database
@@ -146,6 +154,12 @@ DATABASE_PORT=3306
 
 JWT_SECRET="your_secret_key"
 JWT_EXPIRES_IN="7d"
+
+QINIU_ACCESS_KEY="your_access_key"
+QINIU_SECRET_KEY="your_secret_key"
+QINIU_BUCKET="your_bucket_name"
+QINIU_DOMAIN="https://cdn.example.com"
+QINIU_ZONE=z0
 EOF
 chmod 600 .env
 ```

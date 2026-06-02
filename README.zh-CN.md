@@ -14,6 +14,7 @@
 - **日志**：Morgan + Winston
 - **限流**：express-rate-limit
 - **安全**：Helmet
+- **文件上传**：Multer + 七牛云
 - **测试**：Vitest + Supertest
 - **包管理器**：pnpm
 
@@ -31,6 +32,7 @@ admin-api
 │   ├── config             # 配置文件（数据库连接等）
 │   ├── controllers        # 控制器：解析请求，调用 Service，返回响应
 │   ├── generated          # Prisma 自动生成的客户端（不提交到 Git）
+│   ├── infrastructure     # 第三方服务集成
 │   ├── middlewares        # 中间件：鉴权、限流、错误处理等
 │   ├── routes             # 路由定义
 │   ├── scripts            # 脚本文件（数据初始化、任务脚本等）
@@ -93,6 +95,12 @@ DATABASE_PORT=3306
 
 JWT_SECRET="你的密钥"
 JWT_EXPIRES_IN="7d"
+
+QINIU_ACCESS_KEY="你的 AccessKey"
+QINIU_SECRET_KEY="你的 SecretKey"
+QINIU_BUCKET="你的存储空间名"
+QINIU_DOMAIN="https://cdn.example.com"
+QINIU_ZONE=z0
 ```
 
 ### 4. 初始化数据库
@@ -146,6 +154,12 @@ DATABASE_PORT=3306
 
 JWT_SECRET="你的密钥"
 JWT_EXPIRES_IN="7d"
+
+QINIU_ACCESS_KEY="你的 AccessKey"
+QINIU_SECRET_KEY="你的 SecretKey"
+QINIU_BUCKET="你的存储空间名"
+QINIU_DOMAIN="https://cdn.example.com"
+QINIU_ZONE=z0
 EOF
 chmod 600 .env
 ```
