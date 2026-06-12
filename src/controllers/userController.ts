@@ -3,7 +3,7 @@ import { asyncHandler } from '@/utils/handler';
 import { success } from '@/utils/response';
 import { validate } from '@/utils/validate';
 import { idSchema } from '@/validators/commonValidators';
-import { userQuerySchema, userSchema } from '@/validators/userValidators';
+import { userEditSchema, userQuerySchema, userSchema } from '@/validators/userValidators';
 
 // 获取当前登录用户的信息
 export const getUser = asyncHandler(async (req, res) => {
@@ -34,7 +34,7 @@ export const addUser = asyncHandler(async (req, res) => {
 // 编辑用户
 export const updateUser = asyncHandler(async (req, res) => {
   const { id } = validate(idSchema, req.params);
-  const data = validate(userSchema, req.body);
+  const data = validate(userEditSchema, req.body);
   await userService.updateUser(id, data);
   success(res);
 });

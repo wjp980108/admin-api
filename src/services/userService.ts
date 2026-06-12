@@ -72,13 +72,14 @@ export async function getUserList(query: UserQuery) {
   const { name, phone, status, page = 1, pageSize = 10 } = query;
 
   const where = {
+    isSystem: false,
     ...(name && { name: { contains: name } }),
     ...(phone && { phone: { contains: phone } }),
     ...(status !== undefined && { status }),
   };
 
   // 开启事务，同时执行多个互不依赖的查询
-  const [list, total] = await prisma.$transaction([
+  const [users, total] = await prisma.$transaction([
     // 查询当前页数据
     prisma.user.findMany({
       where,
@@ -86,10 +87,16 @@ export async function getUserList(query: UserQuery) {
       skip: (page - 1) * pageSize, // 当前页的前面有几页 * 每页几条
       take: pageSize,
       orderBy: { createdAt: 'desc' },
+      include: { roles: { select: { roleId: true } } },
     }),
     // 查询总条数
     prisma.user.count({ where }),
   ]);
+
+  const list = users.map(({ roles, ...user }) => ({
+    ...user,
+    roleIds: roles.map(role => role.roleId),
+  }));
 
   return { list, total };
 }

@@ -6,6 +6,8 @@ model User {
   phone     String?
   avatar    String?
   email     String?
+  gender    Int      @default(0)
+  remark    String?
   status    Boolean  @default(true)
   isSystem  Boolean  @default(false)
   createdAt DateTime @default(now())
