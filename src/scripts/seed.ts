@@ -15,6 +15,7 @@ async function initAccount() {
       username: 'admin',
       password: hashedPassword,
       isSystem: true,
+      avatar: 'https://img.wjp.plus/admin/1780326425093.jpg',
     },
   });
 }
