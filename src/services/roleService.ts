@@ -5,6 +5,9 @@ import prisma from '@/config/database';
 // 获取全量角色列表
 export async function getRoleAll() {
   return prisma.role.findMany({
+    where: {
+      status: true,
+    },
     orderBy: { createdAt: 'desc' },
   });
 }
