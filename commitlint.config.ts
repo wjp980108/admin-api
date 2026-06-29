@@ -39,18 +39,21 @@ const COMMIT_TYPES = TYPE_CONFIG.map(type => type.value);
  * 定义项目模块范围，保证提交信息的模块化和一致性
  */
 const SCOPE_CONFIG = [
-  { value: 'routes', name: '🛣️ routes       - 路由相关' },
-  { value: 'controllers', name: '🎮 controllers   - 控制器相关' },
-  { value: 'services', name: '🔄 services      - 业务逻辑相关' },
-  { value: 'middlewares', name: '🛡️ middlewares  - 中间件相关' },
-  { value: 'config', name: '⚙️ config        - 配置文件' },
-  { value: 'prisma', name: '🗄️ prisma       - 数据库相关' },
-  { value: 'scripts', name: '📜 scripts       - 脚本文件' },
-  { value: 'types', name: '📝 types         - TypeScript类型' },
-  { value: 'utils', name: '🛠️ utils        - 工具函数' },
-  { value: 'tests', name: '🧪 tests         - 测试相关' },
-  { value: 'deps', name: '📋 deps          - 依赖管理' },
-  { value: 'build', name: '🏗️ build        - 构建配置' },
+  { value: 'api', name: '🌐 api             - 完整接口 (跨层级变更)' },
+  { value: 'routes', name: '🛣️ routes         - 路由相关' },
+  { value: 'controllers', name: '🎮 controllers     - 控制器相关' },
+  { value: 'services', name: '🔄 services        - 业务逻辑相关' },
+  { value: 'middlewares', name: '🛡️ middlewares    - 中间件相关' },
+  { value: 'config', name: '⚙️ config          - 配置文件' },
+  { value: 'prisma', name: '🗄️ prisma         - 数据库相关' },
+  { value: 'scripts', name: '📜 scripts         - 脚本文件' },
+  { value: 'types', name: '📝 types           - TypeScript类型' },
+  { value: 'utils', name: '🛠️ utils          - 工具函数' },
+  { value: 'validators', name: '✔️ validators      - 请求参数校验' },
+  { value: 'infrastructure', name: '🏢 infrastructure  - 基础设施层' },
+  { value: 'tests', name: '🧪 tests           - 测试相关' },
+  { value: 'deps', name: '📋 deps            - 依赖管理' },
+  { value: 'build', name: '🏗️ build          - 构建配置' },
 ];
 
 /** 提取作用域值数组，用于 commitlint 规则校验 */
